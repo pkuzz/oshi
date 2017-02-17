@@ -34,6 +34,8 @@ import oshi.util.ExecutingCommand;
 import oshi.util.ParseUtil;
 import oshi.util.platform.unix.freebsd.BsdSysctlUtil;
 
+import static oshi.util.Util.getOrDefault;
+
 /**
  * FreeBSD hard disk implementation.
  *
@@ -169,7 +171,7 @@ public class FreeBsdDisks implements Disks {
                     partition = new HWPartition();
                     partition.setIdentification(part);
                     partition.setName(part);
-                    partition.setMountPoint(mountMap.getOrDefault(part, ""));
+                    partition.setMountPoint(getOrDefault(mountMap, part, ""));
                 }
             }
             // If we don't have a valid store, don't bother parsing anything

@@ -18,14 +18,12 @@
  */
 package oshi.hardware;
 
+import org.junit.Test;
+import org.threeten.bp.LocalDate;
+import oshi.SystemInfo;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.time.LocalDate;
-
-import org.junit.Test;
-
-import oshi.SystemInfo;
 
 /**
  * Tests Computer System

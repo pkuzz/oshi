@@ -18,14 +18,14 @@
  */
 package oshi.util;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.bp.LocalDate;
+import org.threeten.bp.format.DateTimeFormatter;
+import org.threeten.bp.format.DateTimeParseException;
+
+import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Formatting utility for appending units or converting between number types.

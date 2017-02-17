@@ -19,6 +19,7 @@
 package oshi.hardware.platform.linux;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,10 @@ public class LinuxSensors implements Sensors {
                 // Find any *_input files in that path
                 File dir = new File(path);
                 File[] matchingFiles = dir
-                        .listFiles(f -> f.getName().startsWith(prefix) && f.getName().endsWith("_input"));
+                        .listFiles(new FileFilter() {
+                            @Override
+                            public boolean accept(File f) {return f.getName().startsWith(prefix) && f.getName().endsWith("_input");}
+                        });
                 if (matchingFiles != null && matchingFiles.length > 0) {
                     this.hwmonMap.put(sensor, String.format("%s/%s", path, sensor));
                 }

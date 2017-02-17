@@ -18,20 +18,21 @@
  */
 package oshi.hardware.platform.linux;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import oshi.hardware.Disks;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
 import oshi.jna.platform.linux.Udev;
 import oshi.util.FileUtil;
 import oshi.util.ParseUtil;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static oshi.util.Util.getOrDefault;
 
 /**
  * Linux hard disk implementation.
@@ -110,7 +111,7 @@ public class LinuxDisks implements Disks {
                                     0),
                             ParseUtil.parseIntOrDefault(Udev.INSTANCE.udev_device_get_property_value(device, "MINOR"),
                                     0),
-                            this.mountsMap.getOrDefault(name, ""));
+                            getOrDefault(this.mountsMap, name, ""));
                     store.setPartitions(partArray);
                 }
                 entry = Udev.INSTANCE.udev_list_entry_get_next(oldEntry);

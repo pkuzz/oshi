@@ -18,6 +18,15 @@
  */
 package oshi.hardware;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import oshi.SystemInfo;
+import oshi.hardware.platform.linux.LinuxNetworks;
+import oshi.hardware.platform.mac.MacNetworks;
+import oshi.hardware.platform.unix.freebsd.FreeBsdNetworks;
+import oshi.hardware.platform.unix.solaris.SolarisNetworks;
+import oshi.hardware.platform.windows.WindowsNetworks;
+
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -25,17 +34,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.StringJoiner;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import oshi.SystemInfo;
-import oshi.hardware.platform.linux.LinuxNetworks;
-import oshi.hardware.platform.mac.MacNetworks;
-import oshi.hardware.platform.unix.freebsd.FreeBsdNetworks;
-import oshi.hardware.platform.unix.solaris.SolarisNetworks;
-import oshi.hardware.platform.windows.WindowsNetworks;
 
 /**
  * A network interface in the machine, including statistics
@@ -82,16 +80,18 @@ public class NetworkIF implements Serializable {
             // Set MTU
             this.mtu = networkInterface.getMTU();
             // Set MAC
-            byte[] hwmac = networkInterface.getHardwareAddress();
-            if (hwmac != null) {
-                StringJoiner sj = new StringJoiner(":");
-                for (byte b : hwmac) {
-                    sj.add(String.format("%02x", b));
+            StringBuilder sb = new StringBuilder(18);
+            byte[] mac = networkInterface.getHardwareAddress();
+            if (mac != null) {
+                for (byte b : mac) {
+                    if (sb.length() > 0)
+                        sb.append(':');
+                    sb.append(String.format("%02x", b));
                 }
-                this.mac = sj.toString();
             } else {
                 this.mac = "Unknown";
             }
+            this.mac = sb.toString();
             // Set IP arrays
             ArrayList<String> ipv4list = new ArrayList<>();
             ArrayList<String> ipv6list = new ArrayList<>();

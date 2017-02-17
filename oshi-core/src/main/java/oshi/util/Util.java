@@ -18,8 +18,12 @@
  */
 package oshi.util;
 
+import com.google.common.base.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * General utility methods
@@ -30,6 +34,64 @@ public class Util {
     private static final Logger LOG = LoggerFactory.getLogger(Util.class);
 
     private Util() {
+    }
+
+    public static String toUnsignedString(int i) {
+        return Long.toString(toUnsignedLong(i));
+    }
+
+    public static long toUnsignedLong(int x) {
+        return ((long) x) & 0xffffffffL;
+    }
+
+    public static String toUnsignedString(long i) {
+        if (i >= 0)
+            return Long.toString(i, 10);
+        else {
+            /*
+            * We can get the effect of an unsigned division by 10
+            * on a long value by first shifting right, yielding a
+            * positive value, and then dividing by 5.  This
+            * allows the last digit and preceding digits to be
+            * isolated more quickly than by an initial conversion
+            * to BigInteger.
+            */
+            long quot = (i >>> 1) / 5;
+            long rem = i - quot * 10;
+            return Long.toString(quot) + rem;
+        }
+    }
+
+
+    public static <K, V> V putIfAbsent(Map<K, V> map, K key, V value) {
+        V v = map.get(key);
+        if (v == null) {
+            v = map.put(key, value);
+        }
+
+        return v;
+    }
+
+    public static <K, V> V computeIfAbsent(Map<K, V> map, K key,
+                                           Function<? super K, ? extends V> mappingFunction) {
+        Objects.requireNonNull(mappingFunction);
+        V v;
+        if ((v = map.get(key)) == null) {
+            V newValue;
+            if ((newValue = mappingFunction.apply(key)) != null) {
+                map.put(key, newValue);
+                return newValue;
+            }
+        }
+
+        return v;
+    }
+
+    public static <V> V getOrDefault(Map<?, V> map, Object key, V defaultValue) {
+        V v;
+        return (((v = map.get(key)) != null) || map.containsKey(key))
+                ? v
+                : defaultValue;
     }
 
     /**

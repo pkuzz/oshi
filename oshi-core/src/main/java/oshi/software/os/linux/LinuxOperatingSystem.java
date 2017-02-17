@@ -18,18 +18,11 @@
  */
 package oshi.software.os.linux;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.jna.platform.linux.Libc;
 import oshi.jna.platform.linux.Libc.Sysinfo;
 import oshi.software.common.AbstractOperatingSystem;
@@ -40,6 +33,14 @@ import oshi.util.ExecutingCommand;
 import oshi.util.FileUtil;
 import oshi.util.ParseUtil;
 import oshi.util.platform.linux.ProcUtil;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static oshi.util.Util.getOrDefault;
 
 /**
  * Linux is a family of free operating systems most commonly used on personal
@@ -143,8 +144,8 @@ public class LinuxOperatingSystem extends AbstractOperatingSystem {
                 ParseUtil.parseLongOrDefault(split[21], 0L), // startTime (after
                                                              // uptime)
                 // See man proc for how to parse /proc/[pid]/io
-                ParseUtil.parseLongOrDefault(io.getOrDefault("read_bytes", ""), 0L),
-                ParseUtil.parseLongOrDefault(io.getOrDefault("write_bytes", ""), 0L), System.currentTimeMillis() //
+                ParseUtil.parseLongOrDefault(getOrDefault(io, "read_bytes", ""), 0L),
+                ParseUtil.parseLongOrDefault(getOrDefault(io, "write_bytes", ""), 0L), System.currentTimeMillis() //
         );
     }
 
@@ -410,9 +411,14 @@ public class LinuxOperatingSystem extends AbstractOperatingSystem {
         // Look for any /etc/*-release, *-version, and variants
         File etc = new File("/etc");
         // Find any *_input files in that path
-        File[] matchingFiles = etc.listFiles(f -> (f.getName().endsWith("-release") || f.getName().endsWith("-version")
-                || f.getName().endsWith("_release") || f.getName().endsWith("_version"))
-                && !(f.getName().endsWith("os-release") || f.getName().endsWith("lsb-release")));
+        File[] matchingFiles = etc.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return (f.getName().endsWith("-release") || f.getName().endsWith("-version")
+                        || f.getName().endsWith("_release") || f.getName().endsWith("_version"))
+                        && !(f.getName().endsWith("os-release") || f.getName().endsWith("lsb-release"));
+            }
+        });
         if (matchingFiles != null && matchingFiles.length > 0) {
             return matchingFiles[0].getPath();
         }

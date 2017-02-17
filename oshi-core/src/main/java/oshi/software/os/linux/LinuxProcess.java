@@ -20,6 +20,7 @@ package oshi.software.os.linux;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -117,7 +118,10 @@ public class LinuxProcess extends AbstractProcess {
         // Get all the pid files (guaranteed to be digit-only filenames)
         File[] pids = ProcUtil.getPidFiles();
         // Sort descending "numerically"
-        Arrays.sort(pids, (f1, f2) -> Integer.valueOf(f2.getName()).compareTo(Integer.valueOf(f1.getName())));
+        Arrays.sort(pids, new Comparator<File>() {
+            @Override
+            public int compare(File f1, File f2) {return Integer.valueOf(f2.getName()).compareTo(Integer.valueOf(f1.getName()));}
+        });
 
         // Iterate /proc/[pid]/stat checking the creation time (field 22,
         // jiffies since boot). Since we're working on descending PIDs, we

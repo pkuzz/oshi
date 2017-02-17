@@ -18,21 +18,19 @@
  */
 package oshi.util.platform.unix.solaris;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.jna.platform.unix.solaris.LibKstat;
 import oshi.jna.platform.unix.solaris.LibKstat.Kstat;
 import oshi.jna.platform.unix.solaris.LibKstat.KstatCtl;
 import oshi.jna.platform.unix.solaris.LibKstat.KstatNamed;
 import oshi.util.FormatUtil;
 import oshi.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides access to kstat information on Solaris
@@ -86,11 +84,11 @@ public class KstatUtil {
         case LibKstat.KSTAT_DATA_INT32:
             return Integer.toString(data.value.i32);
         case LibKstat.KSTAT_DATA_UINT32:
-            return Integer.toUnsignedString(data.value.ui32);
+            return Util.toUnsignedString(data.value.ui32);
         case LibKstat.KSTAT_DATA_INT64:
             return Long.toString(data.value.i64);
         case LibKstat.KSTAT_DATA_UINT64:
-            return Long.toUnsignedString(data.value.ui64);
+            return Util.toUnsignedString(data.value.ui64);
         case LibKstat.KSTAT_DATA_STRING:
             return data.value.str.addr.getString(0);
         default:

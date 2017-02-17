@@ -18,17 +18,11 @@
  */
 package oshi.hardware.platform.mac;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Function;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
-
 import oshi.hardware.UsbDevice;
 import oshi.hardware.common.AbstractUsbDevice;
 import oshi.jna.platform.mac.CoreFoundation;
@@ -37,6 +31,11 @@ import oshi.jna.platform.mac.CoreFoundation.CFTypeRef;
 import oshi.jna.platform.mac.IOKit;
 import oshi.util.platform.mac.CfUtil;
 import oshi.util.platform.mac.IOKitUtil;
+
+import java.util.*;
+
+import static oshi.util.Util.computeIfAbsent;
+import static oshi.util.Util.getOrDefault;
 
 public class MacUsbDevice extends AbstractUsbDevice {
 
@@ -142,7 +141,10 @@ public class MacUsbDevice extends AbstractUsbDevice {
                     IOKit.INSTANCE.IORegistryEntryGetRegistryEntryID(parent.getValue(), parentId);
                 }
                 // Store parent in map
-                hubMap.computeIfAbsent(parentId.getValue(), k -> new ArrayList<Long>()).add(childId.getValue());
+                computeIfAbsent(hubMap, parentId.getValue(), new Function<Long, List<Long>>() {
+                    @Override
+                    public List<Long> apply(Long k) {return new ArrayList<Long>();}
+                }).add(childId.getValue());
 
                 // Get device name and store in map
                 IOKit.INSTANCE.IORegistryEntryGetName(childDevice, buffer);
@@ -250,16 +252,16 @@ public class MacUsbDevice extends AbstractUsbDevice {
      * @return A MacUsbDevice corresponding to this device
      */
     private static MacUsbDevice getDeviceAndChildren(Long registryEntryId, String vid, String pid) {
-        String vendorId = vendorIdMap.getOrDefault(registryEntryId, vid);
-        String productId = productIdMap.getOrDefault(registryEntryId, pid);
-        List<Long> childIds = hubMap.getOrDefault(registryEntryId, new ArrayList<Long>());
+        String vendorId = getOrDefault(vendorIdMap, registryEntryId, vid);
+        String productId = getOrDefault(productIdMap, registryEntryId, pid);
+        List<Long> childIds = getOrDefault(hubMap, registryEntryId, new ArrayList<Long>());
         List<MacUsbDevice> usbDevices = new ArrayList<>();
         for (Long id : childIds) {
             usbDevices.add(getDeviceAndChildren(id, vendorId, productId));
         }
         Collections.sort(usbDevices);
-        return new MacUsbDevice(nameMap.getOrDefault(registryEntryId, vendorId + ":" + productId),
-                vendorMap.getOrDefault(registryEntryId, ""), vendorId, productId,
-                serialMap.getOrDefault(registryEntryId, ""), usbDevices.toArray(new UsbDevice[usbDevices.size()]));
+        return new MacUsbDevice(getOrDefault(nameMap, registryEntryId, vendorId + ":" + productId),
+                getOrDefault(vendorMap, registryEntryId, ""), vendorId, productId,
+                getOrDefault(serialMap, registryEntryId, ""), usbDevices.toArray(new UsbDevice[usbDevices.size()]));
     }
 }

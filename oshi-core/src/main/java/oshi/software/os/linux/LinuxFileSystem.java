@@ -34,6 +34,8 @@ import oshi.software.os.OSFileStore;
 import oshi.util.FileUtil;
 import oshi.util.ParseUtil;
 
+import static oshi.util.Util.getOrDefault;
+
 /**
  * The Linux File System contains {@link OSFileStore}s which are a storage pool,
  * device, partition, volume, concrete file system or other implementation
@@ -152,7 +154,7 @@ public class LinuxFileSystem implements FileSystem {
                 name = "/";
             }
             String volume = split[0].replaceAll("\\\\040", " ");
-            String uuid = uuidMap.getOrDefault(split[0], "");
+            String uuid = getOrDefault(uuidMap, split[0], "");
             long totalSpace = new File(path).getTotalSpace();
             long usableSpace = new File(path).getUsableSpace();
 

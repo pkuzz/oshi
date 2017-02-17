@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Joiner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -529,7 +530,7 @@ public class WmiUtil {
                     break;
                 case PROCESS_GETOWNER:
                     // Win32_Process object GetOwner method
-                    String owner = String.join("\\",
+                    String owner = Joiner.on("\\").join(
                             execMethod(svc, vtProp.stringValue(), "GetOwner", "Domain", "User"));
                     values.get(propertyType.name()).add("\\".equals(owner) ? "N/A" : owner);
                     break;

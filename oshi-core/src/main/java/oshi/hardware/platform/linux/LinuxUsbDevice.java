@@ -18,12 +18,7 @@
  */
 package oshi.hardware.platform.linux;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Function;
 import oshi.hardware.UsbDevice;
 import oshi.hardware.common.AbstractUsbDevice;
 import oshi.hardware.platform.mac.MacUsbDevice;
@@ -31,6 +26,11 @@ import oshi.jna.platform.linux.Udev;
 import oshi.jna.platform.linux.Udev.UdevDevice;
 import oshi.jna.platform.linux.Udev.UdevEnumerate;
 import oshi.jna.platform.linux.Udev.UdevListEntry;
+
+import java.util.*;
+
+import static oshi.util.Util.computeIfAbsent;
+import static oshi.util.Util.getOrDefault;
 
 public class LinuxUsbDevice extends AbstractUsbDevice {
 
@@ -137,7 +137,10 @@ public class LinuxUsbDevice extends AbstractUsbDevice {
             } else {
                 // Add child path (path variable) to parent's path
                 String parentPath = Udev.INSTANCE.udev_device_get_syspath(parent);
-                hubMap.computeIfAbsent(parentPath, k -> new ArrayList<String>()).add(path);
+                computeIfAbsent(hubMap, parentPath, new Function<String, List<String>>() {
+                    @Override
+                    public List<String> apply(String k) {return new ArrayList<String>();}
+                }).add(path);
             }
             Udev.INSTANCE.udev_device_unref(dev);
         }
@@ -166,16 +169,16 @@ public class LinuxUsbDevice extends AbstractUsbDevice {
      * @return A LinuxUsbDevice corresponding to this device
      */
     private static LinuxUsbDevice getDeviceAndChildren(String devPath, String vid, String pid) {
-        String vendorId = vendorIdMap.getOrDefault(devPath, vid);
-        String productId = productIdMap.getOrDefault(devPath, pid);
-        List<String> childPaths = hubMap.getOrDefault(devPath, new ArrayList<String>());
+        String vendorId = getOrDefault(vendorIdMap, devPath, vid);
+        String productId = getOrDefault(productIdMap, devPath, pid);
+        List<String> childPaths = getOrDefault(hubMap, devPath, new ArrayList<String>());
         List<LinuxUsbDevice> usbDevices = new ArrayList<>();
         for (String path : childPaths) {
             usbDevices.add(getDeviceAndChildren(path, vendorId, productId));
         }
         Collections.sort(usbDevices);
-        return new LinuxUsbDevice(nameMap.getOrDefault(devPath, vendorId + ":" + productId),
-                vendorMap.getOrDefault(devPath, ""), vendorId, productId, serialMap.getOrDefault(devPath, ""),
+        return new LinuxUsbDevice(getOrDefault(nameMap, devPath, vendorId + ":" + productId),
+                getOrDefault(vendorMap, devPath, ""), vendorId, productId, getOrDefault(serialMap, devPath, ""),
                 usbDevices.toArray(new UsbDevice[usbDevices.size()]));
     }
 }

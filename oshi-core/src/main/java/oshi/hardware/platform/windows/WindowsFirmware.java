@@ -18,14 +18,14 @@
  */
 package oshi.hardware.platform.windows;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-
+import org.threeten.bp.Instant;
+import org.threeten.bp.ZoneOffset;
 import oshi.hardware.common.AbstractFirmware;
 import oshi.util.platform.windows.WmiUtil;
 import oshi.util.platform.windows.WmiUtil.ValueType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Firmware data obtained from WMI

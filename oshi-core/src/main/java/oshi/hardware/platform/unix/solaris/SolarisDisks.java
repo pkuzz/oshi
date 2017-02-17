@@ -33,6 +33,8 @@ import oshi.util.ExecutingCommand;
 import oshi.util.ParseUtil;
 import oshi.util.platform.unix.solaris.KstatUtil;
 
+import static oshi.util.Util.getOrDefault;
+
 /**
  * Solaris hard disk implementation.
  *
@@ -125,7 +127,7 @@ public class SolarisDisks implements Disks {
                     // update
                     if (!disk.isEmpty()) {
                         updateStore(diskMap.get(disk), model, vendor, product, serial, size, deviceMap.get(disk),
-                                majorMap.getOrDefault(disk, 0));
+                                getOrDefault(majorMap, disk, 0));
                     }
                     // Reset values for next iteration
                     disk = keyValue;
@@ -157,7 +159,7 @@ public class SolarisDisks implements Disks {
             // At end of output update last entry
             if (!disk.isEmpty()) {
                 updateStore(diskMap.get(disk), model, vendor, product, serial, size, deviceMap.get(disk),
-                        majorMap.getOrDefault(disk, 0));
+                        getOrDefault(majorMap, disk, 0));
             }
         }
 

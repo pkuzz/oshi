@@ -18,13 +18,13 @@
  */
 package oshi.util;
 
-import static org.junit.Assert.assertEquals;
-
-import java.text.DecimalFormatSymbols;
-import java.time.LocalDate;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.threeten.bp.LocalDate;
+
+import java.text.DecimalFormatSymbols;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * The Class FormatUtilTest.

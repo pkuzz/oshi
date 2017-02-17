@@ -18,17 +18,15 @@
  */
 package oshi.software.os.unix.freebsd;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.util.ExecutingCommand;
 import oshi.util.platform.unix.freebsd.BsdSysctlUtil;
+
+import java.io.File;
+import java.util.*;
+
+import static oshi.util.Util.getOrDefault;
 
 /**
  * The Solaris File System contains {@link OSFileStore}s which are a storage
@@ -149,7 +147,7 @@ public class FreeBsdFileSystem implements FileSystem {
                 description = "Mount Point";
             }
             // Match UUID
-            String uuid = uuidMap.getOrDefault(name, "");
+            String uuid = getOrDefault(uuidMap, name, "");
             OSFileStore osStore = new OSFileStore(name, volume, path, description, type, uuid, usableSpace, totalSpace);
             fsList.add(osStore);
         }

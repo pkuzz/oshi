@@ -18,30 +18,16 @@
  */
 package oshi.hardware.platform.mac;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.hardware.Disks;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
 import oshi.jna.platform.mac.CoreFoundation;
-import oshi.jna.platform.mac.CoreFoundation.CFBooleanRef;
-import oshi.jna.platform.mac.CoreFoundation.CFDictionaryRef;
-import oshi.jna.platform.mac.CoreFoundation.CFMutableDictionaryRef;
-import oshi.jna.platform.mac.CoreFoundation.CFNumberRef;
-import oshi.jna.platform.mac.CoreFoundation.CFStringRef;
+import oshi.jna.platform.mac.CoreFoundation.*;
 import oshi.jna.platform.mac.DiskArbitration;
 import oshi.jna.platform.mac.DiskArbitration.DADiskRef;
 import oshi.jna.platform.mac.DiskArbitration.DASessionRef;
@@ -52,6 +38,10 @@ import oshi.util.ExecutingCommand;
 import oshi.util.ParseUtil;
 import oshi.util.platform.mac.CfUtil;
 import oshi.util.platform.mac.IOKitUtil;
+
+import java.util.*;
+
+import static oshi.util.Util.getOrDefault;
 
 /**
  * Mac hard disk implementation.
@@ -339,7 +329,7 @@ public class MacDisks implements Disks {
                                     if (logicalVolumeMap.containsKey(partBsdName)) {
                                         mountPoint = "Logical Volume: " + logicalVolumeMap.get(partBsdName);
                                     } else {
-                                        mountPoint = mountPointMap.getOrDefault(partBsdName, "");
+                                        mountPoint = getOrDefault(mountPointMap, partBsdName, "");
                                     }
                                     partitions.add(new HWPartition(partBsdName, name, type,
                                             IOKitUtil.getIORegistryStringProperty(sdService, "UUID"),

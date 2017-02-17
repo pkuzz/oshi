@@ -18,13 +18,7 @@
  */
 package oshi.hardware.platform.windows;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Function;
 import oshi.hardware.Disks;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HWPartition;
@@ -32,6 +26,16 @@ import oshi.jna.platform.windows.Kernel32;
 import oshi.util.ParseUtil;
 import oshi.util.platform.windows.WmiUtil;
 import oshi.util.platform.windows.WmiUtil.ValueType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static oshi.util.Util.computeIfAbsent;
+import static oshi.util.Util.getOrDefault;
 
 /**
  * Windows hard disk implementation.
@@ -84,12 +88,12 @@ public class WindowsDisks implements Disks {
             // Most vendors store serial # as a hex string; convert
             ds.setSerial(ParseUtil.hexStringToString((String) vals.get("SerialNumber").get(i)));
             String index = vals.get("Index").get(i).toString();
-            ds.setReads(readMap.getOrDefault(index, 0L));
-            ds.setReadBytes(readByteMap.getOrDefault(index, 0L));
-            ds.setWrites(writeMap.getOrDefault(index, 0L));
-            ds.setWriteBytes(writeByteMap.getOrDefault(index, 0L));
-            ds.setTransferTime(xferTimeMap.getOrDefault(index, 0L));
-            ds.setTimeStamp(timeStampMap.getOrDefault(index, 0L));
+            ds.setReads(getOrDefault(readMap, index, 0L));
+            ds.setReadBytes(getOrDefault(readByteMap, index, 0L));
+            ds.setWrites(getOrDefault(writeMap, index, 0L));
+            ds.setWriteBytes(getOrDefault(writeByteMap, index, 0L));
+            ds.setTransferTime(getOrDefault(xferTimeMap, index, 0L));
+            ds.setTimeStamp(getOrDefault(timeStampMap, index, 0L));
             // If successful this line is the desired value
             ds.setSize(ParseUtil.parseLongOrDefault((String) vals.get("Size").get(i), 0L));
             // Get partitions
@@ -149,9 +153,12 @@ public class WindowsDisks implements Disks {
             mAnt = DEVICE_ID.matcher(partitionQueryMap.get("Antecedent").get(i));
             mDep = DEVICE_ID.matcher(partitionQueryMap.get("Dependent").get(i));
             if (mAnt.matches() && mDep.matches()) {
-                driveToPartitionMap
-                        .computeIfAbsent(mAnt.group(1).replaceAll("\\\\\\\\", "\\\\"), k -> new ArrayList<String>())
-                        .add(mDep.group(1));
+                computeIfAbsent(driveToPartitionMap,
+                        mAnt.group(1).replaceAll("\\\\\\\\", "\\\\"), new Function<String, List<String>>() {
+                            @Override
+                            public List<String> apply(String k) {return new ArrayList<String>();}
+                        }
+                ).add(mDep.group(1));
             }
         }
 
@@ -171,7 +178,7 @@ public class WindowsDisks implements Disks {
                 "Name,Type,Description,DeviceID,Size,DiskIndex,Index", null, PARTITION_TYPES);
         for (int i = 0; i < hwPartitionQueryMap.get("Name").size(); i++) {
             String deviceID = (String) hwPartitionQueryMap.get("DeviceID").get(i);
-            String logicalDrive = partitionToLogicalDriveMap.getOrDefault(deviceID, "");
+            String logicalDrive = getOrDefault(partitionToLogicalDriveMap, deviceID, "");
             String uuid = "";
             if (!logicalDrive.isEmpty()) {
                 // Get matching volume for UUID
